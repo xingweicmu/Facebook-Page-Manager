@@ -195,11 +195,24 @@ public class MainActivity extends FragmentActivity {
         profilePictureView = (ProfilePictureView) findViewById(R.id.profilePicture);
         greeting = (TextView) findViewById(R.id.greeting);
 
-        Button meButton = (Button) findViewById(R.id.me);
-        meButton.setOnClickListener(new View.OnClickListener() {
+        Button publishPostButton = (Button) findViewById(R.id.publishPostButton);
+        publishPostButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-//                test();
-                retriveAllPosts();
+                publishPost();
+            }
+        });
+
+        Button allPostButton = (Button) findViewById(R.id.allPostButton);
+        allPostButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                retrieveAllPosts();
+            }
+        });
+
+        Button postViewButton = (Button) findViewById(R.id.postViewButton);
+        postViewButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                onePostView();
             }
         });
 
@@ -301,7 +314,7 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-    public void test() {
+    public void publishPost() {
         LoginManager.getInstance().logInWithPublishPermissions(this, Arrays.asList("manage_pages"));
         LoginManager.getInstance().logInWithPublishPermissions(this, Arrays.asList("publish_pages"));
         new GraphRequest(
@@ -398,8 +411,8 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-    private void retriveAllPosts() {
-        new GetTask().execute("");
+    private void retrieveAllPosts() {
+        new GetTask().execute("https://graph.facebook.com/901893839866098/feed?fields=id,message,from,to&access_token=CAAB8PDqe1GoBAHffQeSzahQng2S8kZBxpB6kBpGS2FiYCtvbxcOLUcgzKR8ZAkAclUKZBh9dDp1MK9jtDpOli6Sv633EaSIkHbuREVVxZAv5iXarLJk0hZCImwRl7itk1eB3ej2a1ol5F1nZBAizZAlSZA74u2cZAqkZCZAjo3ZBUKZCLiriiRpkjdb4rtNkx3Fy4lKIZD");
     }
 
     class GetTask extends AsyncTask<String, Void, String> {
@@ -408,7 +421,7 @@ public class MainActivity extends FragmentActivity {
 
         protected String doInBackground(String... urls) {
             try {
-                String url = "https://graph.facebook.com/901893839866098/feed?fields=id,message,from,to&access_token=CAAB8PDqe1GoBAHffQeSzahQng2S8kZBxpB6kBpGS2FiYCtvbxcOLUcgzKR8ZAkAclUKZBh9dDp1MK9jtDpOli6Sv633EaSIkHbuREVVxZAv5iXarLJk0hZCImwRl7itk1eB3ej2a1ol5F1nZBAizZAlSZA74u2cZAqkZCZAjo3ZBUKZCLiriiRpkjdb4rtNkx3Fy4lKIZD";
+                String url = urls[0];
 
                 URL obj = new URL(url);
                 HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -443,6 +456,11 @@ public class MainActivity extends FragmentActivity {
             // TODO: check this.exception
             // TODO: do something with the feed
         }
+    }
+
+    public void onePostView() {
+        LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("read_insights"));
+        new GetTask().execute("https://graph.facebook.com/901893839866098_907019126020236/insights/post_impressions_unique/lifetime?access_token=CAAB8PDqe1GoBAHffQeSzahQng2S8kZBxpB6kBpGS2FiYCtvbxcOLUcgzKR8ZAkAclUKZBh9dDp1MK9jtDpOli6Sv633EaSIkHbuREVVxZAv5iXarLJk0hZCImwRl7itk1eB3ej2a1ol5F1nZBAizZAlSZA74u2cZAqkZCZAjo3ZBUKZCLiriiRpkjdb4rtNkx3Fy4lKIZD");
     }
 
     private void onClickPostStatusUpdate() {

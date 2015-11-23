@@ -32,7 +32,7 @@
         android:background="#FFF"
         android:id="@+id/main_ui_container">
         <com.facebook.login.widget.LoginButton
-            android:layout_width="wrap_content"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:layout_gravity="center_horizontal"
@@ -40,7 +40,7 @@
             facebook:com_facebook_tooltip_mode="never_display"
             />
         <LinearLayout
-            android:layout_width="150dp"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:gravity="center_horizontal"
@@ -73,15 +73,25 @@
                 android:layout_height="wrap_content"
                 android:text="Post Photo"
                 />
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Publish Post"
+                android:id="@+id/publishPostButton" />
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="All Post"
+                android:id="@+id/allPostButton" />
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Post Views"
+                android:id="@+id/postViewButton" />
 
         </LinearLayout>
 
-        <Button
-            android:layout_width="163dp"
-            android:layout_height="wrap_content"
-            android:text="me"
-            android:id="@+id/me"
-            android:layout_gravity="center_horizontal" />
+
     </LinearLayout>
 
 </LinearLayout>
