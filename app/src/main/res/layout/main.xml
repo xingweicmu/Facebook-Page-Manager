@@ -88,6 +88,11 @@
                 android:layout_height="wrap_content"
                 android:text="Post Views"
                 android:id="@+id/postViewButton" />
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Post Page"
+                android:id="@+id/postPageButton" />
 
         </LinearLayout>
 

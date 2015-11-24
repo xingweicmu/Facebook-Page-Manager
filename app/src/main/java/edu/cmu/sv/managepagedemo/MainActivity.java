@@ -1,6 +1,7 @@
 package edu.cmu.sv.managepagedemo;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -75,7 +77,7 @@ public class MainActivity extends FragmentActivity {
     private final String PENDING_ACTION_BUNDLE_KEY =
             "com.example.hellofacebook:PendingAction";
 
-    private String pageAccessTotken;
+    public static String pageAccessTotken;
     private Button postStatusUpdateButton;
     private Button postPhotoButton;
     private ProfilePictureView profilePictureView;
@@ -216,6 +218,14 @@ public class MainActivity extends FragmentActivity {
             }
         });
 
+        Button postPageButton = (Button) findViewById(R.id.postPageButton);
+        postPageButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, PostActivity.class);
+                startActivity(intent);
+            }
+        });
+
         postStatusUpdateButton = (Button) findViewById(R.id.postStatusUpdateButton);
         postStatusUpdateButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
@@ -330,11 +340,17 @@ public class MainActivity extends FragmentActivity {
                         JSONObject jsonObject = response.getJSONObject();
                         JSONArray array = null;
                         try {
-                            array = jsonObject.getJSONArray("data");
-                            for(int i = 0; i < array.length(); i++) {
-                                JSONObject item = array.getJSONObject(i);
-                                pageAccessTotken = item.getString("access_token");
-                                Log.d("facebook##", "response "+ item.getString("access_token"));
+                            if(jsonObject != null) {
+                                array = jsonObject.getJSONArray("data");
+                                for (int i = 0; i < array.length(); i++) {
+                                    JSONObject item = array.getJSONObject(i);
+                                    pageAccessTotken = item.getString("access_token");
+                                    Log.d("facebook##", "response " + item.getString("access_token"));
+                                }
+                                createRegularPost();
+                            }
+                            else{
+                                Toast.makeText(getApplicationContext(), "OAuthException! Please try to login again.", Toast.LENGTH_LONG).show();
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -342,17 +358,24 @@ public class MainActivity extends FragmentActivity {
                     }
                 }
         ).executeAsync();
-        createRegularPost();
+
     }
 
     private void createRegularPost() {
-        new PostTask().execute("");
+        new PostTask(this).execute("");
     }
     class PostTask extends AsyncTask<String, Void, String> {
 
         private Exception exception;
+//        private String response;
+        private Context context;
+
+        public PostTask(Context context) {
+            this.context = context;
+        }
 
         protected String doInBackground(String... urls) {
+            String response = "";
             try {
                 URL url = new URL("https://graph.facebook.com/901893839866098/feed");
                 HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
@@ -366,7 +389,7 @@ public class MainActivity extends FragmentActivity {
                 // FOR POST
                 Uri.Builder builder = new Uri.Builder()
                         .appendQueryParameter("message", "published post")
-                        .appendQueryParameter("access_token", "CAAB8PDqe1GoBAHffQeSzahQng2S8kZBxpB6kBpGS2FiYCtvbxcOLUcgzKR8ZAkAclUKZBh9dDp1MK9jtDpOli6Sv633EaSIkHbuREVVxZAv5iXarLJk0hZCImwRl7itk1eB3ej2a1ol5F1nZBAizZAlSZA74u2cZAqkZCZAjo3ZBUKZCLiriiRpkjdb4rtNkx3Fy4lKIZD");
+                        .appendQueryParameter("access_token", "CAAVOngp3Ys0BALNZCZCZBHpWvl4utVHM0ywTi6LQeBzPGpMq17rM4LkArniQMqOc6npLZAyNPEM7HFP8lE3skYAakswBORPEcMHb22yXvZBWqQYZBUGEZA8NSEwQ0dzB0YqvZCnSqoUsHd2ZCHecZA8ZCijJp3OSoDCH3fLHihCQtbMzZCP7Ps7bIZBl2");
                 String query = builder.build().getEncodedQuery();
 
                 // FOR GET
@@ -382,37 +405,40 @@ public class MainActivity extends FragmentActivity {
                 writer.flush();
                 writer.close();
                 os.close();
-                String response = "";
                 int responseCode=conn.getResponseCode();
                 Log.d("facebook##", responseCode + "");
-//                if (responseCode == HttpsURLConnection.HTTP_OK) {
+                if (responseCode == HttpsURLConnection.HTTP_OK) {
                     String line;
                     BufferedReader br=new BufferedReader(new InputStreamReader(conn.getInputStream()));
                     while ((line=br.readLine()) != null) {
                         response+=line;
                     }
                     Log.d("facebook##", response);
-//                }
-//                else {
-//                    response="";
-//                }
+                }
+                else {
+                    response=null;
+                }
 
             }catch(Exception e) {
                 e.printStackTrace();
             }
-            return null;
+            return response;
         }
 
 
 
-        protected void onPostExecute(String feed) {
+        protected void onPostExecute(String response) {
             // TODO: check this.exception
             // TODO: do something with the feed
+            if(response != null) {
+                Toast.makeText(getApplicationContext(), "Post success!", Toast.LENGTH_LONG).show();
+                startActivity(new Intent(this.context, MainActivity.class));
+            }
         }
     }
 
     private void retrieveAllPosts() {
-        new GetTask().execute("https://graph.facebook.com/901893839866098/feed?fields=id,message,from,to&access_token=CAAB8PDqe1GoBAHffQeSzahQng2S8kZBxpB6kBpGS2FiYCtvbxcOLUcgzKR8ZAkAclUKZBh9dDp1MK9jtDpOli6Sv633EaSIkHbuREVVxZAv5iXarLJk0hZCImwRl7itk1eB3ej2a1ol5F1nZBAizZAlSZA74u2cZAqkZCZAjo3ZBUKZCLiriiRpkjdb4rtNkx3Fy4lKIZD");
+        new GetTask().execute("https://graph.facebook.com/901893839866098/feed?fields=id,message,from,to&access_token=CAAVOngp3Ys0BACoqRehqry0EaCDFbWGdJbPxpKf77FdHDZBJl9nvrYYMOWFAKSj1ldhOSw8tpqVfpTTJ41y21HTg94NTL0J6TNYHbTtZBc7Y1Da3AsLYekuABBRrWwtdHclNZAFM9OjDLADbNzaJ16TELyx1xZCAgdOSQxGH5sPpA7f0dzYV");
     }
 
     class GetTask extends AsyncTask<String, Void, String> {
@@ -460,7 +486,7 @@ public class MainActivity extends FragmentActivity {
 
     public void onePostView() {
         LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("read_insights"));
-        new GetTask().execute("https://graph.facebook.com/901893839866098_907019126020236/insights/post_impressions_unique/lifetime?access_token=CAAB8PDqe1GoBAHffQeSzahQng2S8kZBxpB6kBpGS2FiYCtvbxcOLUcgzKR8ZAkAclUKZBh9dDp1MK9jtDpOli6Sv633EaSIkHbuREVVxZAv5iXarLJk0hZCImwRl7itk1eB3ej2a1ol5F1nZBAizZAlSZA74u2cZAqkZCZAjo3ZBUKZCLiriiRpkjdb4rtNkx3Fy4lKIZD");
+        new GetTask().execute("https://graph.facebook.com/901893839866098_907621532626662/insights/post_impressions_unique/lifetime?access_token=CAAVOngp3Ys0BACoqRehqry0EaCDFbWGdJbPxpKf77FdHDZBJl9nvrYYMOWFAKSj1ldhOSw8tpqVfpTTJ41y21HTg94NTL0J6TNYHbTtZBc7Y1Da3AsLYekuABBRrWwtdHclNZAFM9OjDLADbNzaJ16TELyx1xZCAgdOSQxGH5sPpA7f0dzYV");
     }
 
     private void onClickPostStatusUpdate() {
