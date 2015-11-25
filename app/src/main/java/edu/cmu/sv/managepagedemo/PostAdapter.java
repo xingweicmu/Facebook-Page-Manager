@@ -21,8 +21,8 @@ public class PostAdapter extends ArrayAdapter{
     }
 
     static class DataHandler{
-        TextView content;
-        TextView views;
+        TextView message;
+        TextView createTime;
     }
 
     public void add(Object object) {
@@ -50,8 +50,8 @@ public class PostAdapter extends ArrayAdapter{
             row=inflater.inflate(R.layout.post_row,parent,false);
             handler=new DataHandler();
 //            handler.poster=(ImageView)row.findViewById(R.id.move_poster);
-            handler.content=(TextView)row.findViewById(R.id.move_title);
-            handler.views=(TextView)row.findViewById(R.id.move_rating);
+            handler.message=(TextView)row.findViewById(R.id.move_title);
+            handler.createTime=(TextView)row.findViewById(R.id.move_rating);
             row.setTag(handler);
         }
         else {
@@ -62,8 +62,8 @@ public class PostAdapter extends ArrayAdapter{
 
         dataProvider=(PostDataProvider)this.getItem(position);
 //        handler.poster.setImageResource(dataProvider.getMove_poster_resource());
-        handler.content.setText(dataProvider.getContent());
-        handler.views.setText(dataProvider.getViews()+"");
+        handler.message.setText(dataProvider.getMessage());
+        handler.createTime.setText(dataProvider.getCreateTime());
         return row;
     }
 

@@ -7,28 +7,38 @@ import android.os.Parcelable;
  * Created by xingwei on 11/25/15.
  */
 public class PostDataProvider implements Parcelable {
-    private String content;
-    private int views;
+    private String message;
+    private String createTime;
+    private String id;
 
-    public PostDataProvider(String content, int views) {
-        this.content = content;
-        this.views = views;
+    public PostDataProvider(String message, String createTime, String id) {
+        this.message = message;
+        this.createTime = createTime;
+        this.id = id;
     }
 
-    public String getContent() {
-        return content;
+    public String getMessage() {
+        return message;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
-    public int getViews() {
-        return views;
+    public String getCreateTime() {
+        return createTime;
     }
 
-    public void setViews(int views) {
-        this.views = views;
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     @Override
@@ -38,8 +48,9 @@ public class PostDataProvider implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(content);
-        dest.writeInt(views);
+        dest.writeString(message);
+        dest.writeString(createTime);
+        dest.writeString(id);
     }
 
     public static Creator<PostDataProvider> CREATOR = new Creator<PostDataProvider>() {
@@ -53,7 +64,8 @@ public class PostDataProvider implements Parcelable {
     };
 
     private PostDataProvider(Parcel in) {
-        content = in.readString();
-        views = in.readInt();
+        message = in.readString();
+        createTime = in.readString();
+        id = in.readString();
     }
 }

@@ -531,8 +531,10 @@ public class MainActivity extends FragmentActivity {
                     for (int i = 0; i < array.length(); i++) {
                         JSONObject item = array.getJSONObject(i);
                         String message = item.getString("message");
+                        String createTime = item.getString("created_time");
+                        String id = item.getString("id");
                         Log.d("facebook##", "message: " + message);
-                        posts.add(new PostDataProvider(message, 1));
+                        posts.add(new PostDataProvider(message, createTime, id));
                     }
                 }
 
