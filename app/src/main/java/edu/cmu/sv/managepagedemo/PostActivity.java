@@ -21,6 +21,7 @@ import java.io.BufferedWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
 import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -82,6 +83,7 @@ public class PostActivity extends Activity {
 //                startActivity(intent);
                 if(publishFlag){
                     createRegularPost();
+//                    retrieveAllPosts();
                 }
                 else{
 //                    unpublishPost();
@@ -162,6 +164,53 @@ public class PostActivity extends Activity {
                 Toast.makeText(getApplicationContext(), "Post success!", Toast.LENGTH_LONG).show();
                 startActivity(new Intent(this.context, MainActivity.class));
             }
+        }
+    }
+
+    private void retrieveAllPosts() {
+        new GetTask().execute("https://graph.facebook.com/901893839866098/feed?fields=id,message,from,to&access_token=CAAVOngp3Ys0BACoqRehqry0EaCDFbWGdJbPxpKf77FdHDZBJl9nvrYYMOWFAKSj1ldhOSw8tpqVfpTTJ41y21HTg94NTL0J6TNYHbTtZBc7Y1Da3AsLYekuABBRrWwtdHclNZAFM9OjDLADbNzaJ16TELyx1xZCAgdOSQxGH5sPpA7f0dzYV");
+    }
+
+    class GetTask extends AsyncTask<String, Void, String> {
+
+        private Exception exception;
+
+        protected String doInBackground(String... urls) {
+            try {
+                String url = urls[0];
+
+                URL obj = new URL(url);
+                HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+                // optional default is GET
+                con.setRequestMethod("GET");
+
+                int responseCode = con.getResponseCode();
+                Log.d("facebook##", "Response Code : " + responseCode);
+
+                BufferedReader in = new BufferedReader(
+                        new InputStreamReader(con.getInputStream()));
+                String inputLine;
+                StringBuffer response = new StringBuffer();
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+
+                //print result
+                Log.d("facebook##", response.toString());
+            }catch(Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+
+
+        protected void onPostExecute(String feed) {
+            // TODO: check this.exception
+            // TODO: do something with the feed
         }
     }
 

@@ -2,6 +2,7 @@ package edu.cmu.sv.managepagedemo;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -11,8 +12,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -77,6 +81,7 @@ public class MainActivity extends FragmentActivity {
     private final String PENDING_ACTION_BUNDLE_KEY =
             "com.example.hellofacebook:PendingAction";
 
+    private ArrayList<PostDataProvider> posts = new ArrayList<>();
     public static String pageAccessTotken;
     private Button postStatusUpdateButton;
     private Button postPhotoButton;
@@ -208,6 +213,7 @@ public class MainActivity extends FragmentActivity {
         allPostButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 retrieveAllPosts();
+
             }
         });
 
@@ -221,8 +227,9 @@ public class MainActivity extends FragmentActivity {
         Button postPageButton = (Button) findViewById(R.id.postPageButton);
         postPageButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, PostActivity.class);
-                startActivity(intent);
+//                Intent intent = new Intent(MainActivity.this, PostActivity.class);
+//                startActivity(intent);
+                showInputDialog();
             }
         });
 
@@ -247,6 +254,41 @@ public class MainActivity extends FragmentActivity {
         // Can we present the share dialog for photos?
         canPresentShareDialogWithPhotos = ShareDialog.canShow(
                 SharePhotoContent.class);
+    }
+
+    protected void showInputDialog() {
+
+        // get input_dialog.xml view
+        LayoutInflater layoutInflater = LayoutInflater.from(MainActivity.this);
+        View promptView = layoutInflater.inflate(R.layout.input_dialog, null);
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+        alertDialogBuilder.setView(promptView);
+
+        final EditText editText = (EditText) promptView.findViewById(R.id.edittext);
+        final Switch publishSwitch = (Switch) promptView.findViewById(R.id.publishSwitchDialog);
+        // setup a dialog window
+        alertDialogBuilder.setCancelable(false)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        if(publishSwitch.isChecked()) {
+                            createPost(editText.getText().toString(), true);
+                        }
+                        else{
+                            Toast.makeText(getApplicationContext(), "Publish switch is set OFF.", Toast.LENGTH_LONG).show();
+                            createPost(editText.getText().toString(), false);
+                        }
+                    }
+                })
+                .setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+
+        // create an alert dialog
+        AlertDialog alert = alertDialogBuilder.create();
+        alert.show();
     }
 
     @Override
@@ -347,7 +389,7 @@ public class MainActivity extends FragmentActivity {
                                     pageAccessTotken = item.getString("access_token");
                                     Log.d("facebook##", "response " + item.getString("access_token"));
                                 }
-                                createRegularPost();
+//                                createRegularPost("Test");
                             }
                             else{
                                 Toast.makeText(getApplicationContext(), "OAuthException! Please try to login again.", Toast.LENGTH_LONG).show();
@@ -361,13 +403,12 @@ public class MainActivity extends FragmentActivity {
 
     }
 
-    private void createRegularPost() {
-        new PostTask(this).execute("");
+    private void createPost(String postContent, boolean published) {
+        new PostTask(this).execute(postContent, published+"");
     }
     class PostTask extends AsyncTask<String, Void, String> {
 
         private Exception exception;
-//        private String response;
         private Context context;
 
         public PostTask(Context context) {
@@ -388,15 +429,14 @@ public class MainActivity extends FragmentActivity {
 
                 // FOR POST
                 Uri.Builder builder = new Uri.Builder()
-                        .appendQueryParameter("message", "published post")
+                        .appendQueryParameter("message", urls[0])
+//                        .appendQueryParameter("published", "false")
                         .appendQueryParameter("access_token", "CAAVOngp3Ys0BALNZCZCZBHpWvl4utVHM0ywTi6LQeBzPGpMq17rM4LkArniQMqOc6npLZAyNPEM7HFP8lE3skYAakswBORPEcMHb22yXvZBWqQYZBUGEZA8NSEwQ0dzB0YqvZCnSqoUsHd2ZCHecZA8ZCijJp3OSoDCH3fLHihCQtbMzZCP7Ps7bIZBl2");
+                if(urls[1].equals("false")){
+                    builder.appendQueryParameter("published", "false");
+                    Log.d("facebook##", urls[1]+" published->false");
+                }
                 String query = builder.build().getEncodedQuery();
-
-                // FOR GET
-//                Uri.Builder builder = new Uri.Builder()
-//                        .appendQueryParameter("fields", "id,message,from,to")
-//                        .appendQueryParameter("access_token", "CAAB8PDqe1GoBAHffQeSzahQng2S8kZBxpB6kBpGS2FiYCtvbxcOLUcgzKR8ZAkAclUKZBh9dDp1MK9jtDpOli6Sv633EaSIkHbuREVVxZAv5iXarLJk0hZCImwRl7itk1eB3ej2a1ol5F1nZBAizZAlSZA74u2cZAqkZCZAjo3ZBUKZCLiriiRpkjdb4rtNkx3Fy4lKIZD");
-//                String query = builder.build().getEncodedQuery();
 
                 OutputStream os = conn.getOutputStream();
                 BufferedWriter writer = new BufferedWriter(
@@ -438,7 +478,7 @@ public class MainActivity extends FragmentActivity {
     }
 
     private void retrieveAllPosts() {
-        new GetTask().execute("https://graph.facebook.com/901893839866098/feed?fields=id,message,from,to&access_token=CAAVOngp3Ys0BACoqRehqry0EaCDFbWGdJbPxpKf77FdHDZBJl9nvrYYMOWFAKSj1ldhOSw8tpqVfpTTJ41y21HTg94NTL0J6TNYHbTtZBc7Y1Da3AsLYekuABBRrWwtdHclNZAFM9OjDLADbNzaJ16TELyx1xZCAgdOSQxGH5sPpA7f0dzYV");
+        new GetTask().execute("https://graph.facebook.com/901893839866098/feed?access_token=CAAVOngp3Ys0BACoqRehqry0EaCDFbWGdJbPxpKf77FdHDZBJl9nvrYYMOWFAKSj1ldhOSw8tpqVfpTTJ41y21HTg94NTL0J6TNYHbTtZBc7Y1Da3AsLYekuABBRrWwtdHclNZAFM9OjDLADbNzaJ16TELyx1xZCAgdOSQxGH5sPpA7f0dzYV");
     }
 
     class GetTask extends AsyncTask<String, Void, String> {
@@ -446,6 +486,7 @@ public class MainActivity extends FragmentActivity {
         private Exception exception;
 
         protected String doInBackground(String... urls) {
+            String result = "";
             try {
                 String url = urls[0];
 
@@ -469,18 +510,40 @@ public class MainActivity extends FragmentActivity {
                 in.close();
 
                 //print result
+                result = response.toString();
                 Log.d("facebook##", response.toString());
             }catch(Exception e) {
                 e.printStackTrace();
             }
-            return null;
+            return result;
         }
 
 
 
-        protected void onPostExecute(String feed) {
-            // TODO: check this.exception
-            // TODO: do something with the feed
+        protected void onPostExecute(String response) {
+            // Parse the response
+            try {
+                JSONObject jsonObject = new JSONObject(response);
+//                JSONArray array = null;
+
+                if(jsonObject != null) {
+                    JSONArray array = jsonObject.getJSONArray("data");
+                    for (int i = 0; i < array.length(); i++) {
+                        JSONObject item = array.getJSONObject(i);
+                        String message = item.getString("message");
+                        Log.d("facebook##", "message: " + message);
+                        posts.add(new PostDataProvider(message, 1));
+                    }
+                }
+
+                Intent intent = new Intent(MainActivity.this, PostListActivity.class);
+                intent.putParcelableArrayListExtra("posts", posts);
+
+                startActivity(intent);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
