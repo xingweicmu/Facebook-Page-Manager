@@ -62,9 +62,15 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -532,7 +538,16 @@ public class MainActivity extends FragmentActivity {
                     for (int i = 0; i < array.length(); i++) {
                         JSONObject item = array.getJSONObject(i);
                         String message = item.getString("message");
-                        String createTime = item.getString("created_time");
+                        String createTime = "";
+                        try {
+                            DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssZ");
+                            Date result = df.parse(item.getString("created_time"));
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                            Calendar calendar = new GregorianCalendar();
+                            TimeZone timeZone = calendar.getTimeZone();
+                            sdf.setTimeZone(timeZone);
+                            createTime = sdf.format(result);
+                        }catch (Exception e){}
                         String id = item.getString("id");
                         String isPublished = item.getString("is_published");
                         Log.d("facebook##", "message: " + message);
