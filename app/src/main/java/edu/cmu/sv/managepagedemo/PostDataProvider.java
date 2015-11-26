@@ -10,15 +10,27 @@ public class PostDataProvider implements Parcelable {
     private String message;
     private String createTime;
     private String id;
+    private String isPublished;
+    private int views;
 
-    public PostDataProvider(String message, String createTime, String id) {
+    public PostDataProvider(String message, String createTime, String id, String isPublished, int views) {
         this.message = message;
         this.createTime = createTime;
         this.id = id;
+        this.isPublished = isPublished;
+        this.views = views;
     }
 
     public String getMessage() {
         return message;
+    }
+
+    public int getViews() {
+        return views;
+    }
+
+    public void setViews(int views) {
+        this.views = views;
     }
 
     public void setMessage(String message) {
@@ -37,8 +49,17 @@ public class PostDataProvider implements Parcelable {
         return id;
     }
 
+    public String isPublished() {
+        return isPublished;
+    }
+
+    public void setIsPublished(String isPublished) {
+        this.isPublished = isPublished;
+    }
+
     public void setId(String id) {
         this.id = id;
+
     }
 
     @Override
@@ -51,6 +72,8 @@ public class PostDataProvider implements Parcelable {
         dest.writeString(message);
         dest.writeString(createTime);
         dest.writeString(id);
+        dest.writeString(isPublished);
+        dest.writeInt(views);
     }
 
     public static Creator<PostDataProvider> CREATOR = new Creator<PostDataProvider>() {
@@ -67,5 +90,11 @@ public class PostDataProvider implements Parcelable {
         message = in.readString();
         createTime = in.readString();
         id = in.readString();
+        isPublished = in.readString();
+        views = in.readInt();
+    }
+
+    public String toString() {
+        return "Message: "+this.message + "\nViews: " + this.views + "\nPublished: " + this.isPublished + "\nCreated Time: " + this.createTime;
     }
 }

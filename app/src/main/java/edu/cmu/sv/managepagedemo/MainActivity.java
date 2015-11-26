@@ -319,6 +319,7 @@ public class MainActivity extends FragmentActivity {
     @Override
     public void onPause() {
         super.onPause();
+        if(posts!=null) posts.clear();
 
         // Call the 'deactivateApp' method to log an app event for use in analytics and advertising
         // reporting.  Do so in the onPause methods of the primary Activities that an app may be
@@ -478,7 +479,7 @@ public class MainActivity extends FragmentActivity {
     }
 
     private void retrieveAllPosts() {
-        new GetTask().execute("https://graph.facebook.com/901893839866098/feed?access_token=CAAVOngp3Ys0BACoqRehqry0EaCDFbWGdJbPxpKf77FdHDZBJl9nvrYYMOWFAKSj1ldhOSw8tpqVfpTTJ41y21HTg94NTL0J6TNYHbTtZBc7Y1Da3AsLYekuABBRrWwtdHclNZAFM9OjDLADbNzaJ16TELyx1xZCAgdOSQxGH5sPpA7f0dzYV");
+        new GetTask().execute("https://graph.facebook.com/901893839866098/promotable_posts?fields=is_published,created_time,id,message&access_token=CAAVOngp3Ys0BACoqRehqry0EaCDFbWGdJbPxpKf77FdHDZBJl9nvrYYMOWFAKSj1ldhOSw8tpqVfpTTJ41y21HTg94NTL0J6TNYHbTtZBc7Y1Da3AsLYekuABBRrWwtdHclNZAFM9OjDLADbNzaJ16TELyx1xZCAgdOSQxGH5sPpA7f0dzYV");
     }
 
     class GetTask extends AsyncTask<String, Void, String> {
@@ -533,14 +534,15 @@ public class MainActivity extends FragmentActivity {
                         String message = item.getString("message");
                         String createTime = item.getString("created_time");
                         String id = item.getString("id");
+                        String isPublished = item.getString("is_published");
                         Log.d("facebook##", "message: " + message);
-                        posts.add(new PostDataProvider(message, createTime, id));
+                        posts.add(new PostDataProvider(message, createTime, id, isPublished, 0));
                     }
                 }
-
+//                Log.d("facebook##", "main:"+posts.size());
                 Intent intent = new Intent(MainActivity.this, PostListActivity.class);
+//                intent.removeExtra("posts");
                 intent.putParcelableArrayListExtra("posts", posts);
-
                 startActivity(intent);
 
             } catch (JSONException e) {
@@ -548,6 +550,8 @@ public class MainActivity extends FragmentActivity {
             }
         }
     }
+
+
 
     public void onePostView() {
         LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("read_insights"));
