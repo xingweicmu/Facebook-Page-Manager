@@ -37,6 +37,7 @@ import com.facebook.login.LoginResult;
 import com.facebook.login.widget.ProfilePictureView;
 import com.facebook.share.ShareApi;
 import com.facebook.share.Sharer;
+import com.facebook.share.internal.ShareFeedContent;
 import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.model.SharePhoto;
 import com.facebook.share.model.SharePhotoContent;
@@ -91,6 +92,8 @@ public class MainActivity extends FragmentActivity {
     public static String pageAccessTotken;
     private Button postStatusUpdateButton;
     private Button postPhotoButton;
+    private Button pagePostButton;
+    private Button allPagePostButton;
     private ProfilePictureView profilePictureView;
     private TextView greeting;
     private PendingAction pendingAction = PendingAction.NONE;
@@ -136,7 +139,9 @@ public class MainActivity extends FragmentActivity {
     private enum PendingAction {
         NONE,
         POST_PHOTO,
-        POST_STATUS_UPDATE
+        POST_STATUS_UPDATE,
+        PAGE_POST,
+        ALL_PAGE_POST
     }
 
     @Override
@@ -215,11 +220,11 @@ public class MainActivity extends FragmentActivity {
             }
         });
 
-        Button allPostButton = (Button) findViewById(R.id.allPostButton);
-        allPostButton.setOnClickListener(new View.OnClickListener() {
+        allPagePostButton = (Button) findViewById(R.id.allPostButton);
+        allPagePostButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                retrieveAllPosts();
-
+//                retrieveAllPosts();
+                onClickAllPagePost();
             }
         });
 
@@ -230,12 +235,10 @@ public class MainActivity extends FragmentActivity {
             }
         });
 
-        Button postPageButton = (Button) findViewById(R.id.postPageButton);
-        postPageButton.setOnClickListener(new View.OnClickListener() {
+        pagePostButton = (Button) findViewById(R.id.postPageButton);
+        pagePostButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-//                Intent intent = new Intent(MainActivity.this, PostActivity.class);
-//                startActivity(intent);
-                showInputDialog();
+                onClickPagePost();
             }
         });
 
@@ -370,6 +373,11 @@ public class MainActivity extends FragmentActivity {
             case POST_STATUS_UPDATE:
                 postStatusUpdate();
                 break;
+            case PAGE_POST:
+                pagePost();
+                break;
+            case ALL_PAGE_POST:
+                allPagePost();
         }
     }
 
@@ -438,7 +446,7 @@ public class MainActivity extends FragmentActivity {
                 Uri.Builder builder = new Uri.Builder()
                         .appendQueryParameter("message", urls[0])
 //                        .appendQueryParameter("published", "false")
-                        .appendQueryParameter("access_token", "CAAVOngp3Ys0BALNZCZCZBHpWvl4utVHM0ywTi6LQeBzPGpMq17rM4LkArniQMqOc6npLZAyNPEM7HFP8lE3skYAakswBORPEcMHb22yXvZBWqQYZBUGEZA8NSEwQ0dzB0YqvZCnSqoUsHd2ZCHecZA8ZCijJp3OSoDCH3fLHihCQtbMzZCP7Ps7bIZBl2");
+                        .appendQueryParameter("access_token", "CAAOOwRcZBOD4BACwLkcMSXQIdESZCfxn9eMIaalLtDCidomUifxm8YP0ZAZCQUwz5FixBeHV5uWZCLRzUZBa3u4eTtWb0owEcHt9LuZASwk1ppc8HP6dU2YAhCus2dQklG4d8vM0VctRv3lSOzDCZBxT5IeNPIxaYltZAlTZAcqbplvlRTf0m7oRSltW0pJb0umtcZD");
                 if(urls[1].equals("false")){
                     builder.appendQueryParameter("published", "false");
                     Log.d("facebook##", urls[1]+" published->false");
@@ -485,7 +493,7 @@ public class MainActivity extends FragmentActivity {
     }
 
     private void retrieveAllPosts() {
-        new GetTask().execute("https://graph.facebook.com/901893839866098/promotable_posts?fields=is_published,created_time,id,message&access_token=CAAVOngp3Ys0BACoqRehqry0EaCDFbWGdJbPxpKf77FdHDZBJl9nvrYYMOWFAKSj1ldhOSw8tpqVfpTTJ41y21HTg94NTL0J6TNYHbTtZBc7Y1Da3AsLYekuABBRrWwtdHclNZAFM9OjDLADbNzaJ16TELyx1xZCAgdOSQxGH5sPpA7f0dzYV");
+        new GetTask().execute("https://graph.facebook.com/901893839866098/promotable_posts?fields=is_published,created_time,id,message&access_token=CAAOOwRcZBOD4BACwLkcMSXQIdESZCfxn9eMIaalLtDCidomUifxm8YP0ZAZCQUwz5FixBeHV5uWZCLRzUZBa3u4eTtWb0owEcHt9LuZASwk1ppc8HP6dU2YAhCus2dQklG4d8vM0VctRv3lSOzDCZBxT5IeNPIxaYltZAlTZAcqbplvlRTf0m7oRSltW0pJb0umtcZD");
     }
 
     class GetTask extends AsyncTask<String, Void, String> {
@@ -566,11 +574,52 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-
-
     public void onePostView() {
         LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("read_insights"));
-        new GetTask().execute("https://graph.facebook.com/901893839866098_907621532626662/insights/post_impressions_unique/lifetime?access_token=CAAVOngp3Ys0BACoqRehqry0EaCDFbWGdJbPxpKf77FdHDZBJl9nvrYYMOWFAKSj1ldhOSw8tpqVfpTTJ41y21HTg94NTL0J6TNYHbTtZBc7Y1Da3AsLYekuABBRrWwtdHclNZAFM9OjDLADbNzaJ16TELyx1xZCAgdOSQxGH5sPpA7f0dzYV");
+        new GetTask().execute("https://graph.facebook.com/901893839866098_906594766062672/insights/post_impressions_unique/lifetime?access_token=CAAOOwRcZBOD4BACwLkcMSXQIdESZCfxn9eMIaalLtDCidomUifxm8YP0ZAZCQUwz5FixBeHV5uWZCLRzUZBa3u4eTtWb0owEcHt9LuZASwk1ppc8HP6dU2YAhCus2dQklG4d8vM0VctRv3lSOzDCZBxT5IeNPIxaYltZAlTZAcqbplvlRTf0m7oRSltW0pJb0umtcZD");
+    }
+
+    private void onClickAllPagePost() {
+        performPublish(PendingAction.ALL_PAGE_POST, true);
+    }
+
+    private void allPagePost() {
+        Profile profile = Profile.getCurrentProfile();
+        Log.d("facebook##", "profile  " + profile);
+        if (profile != null && hasAllPagePermission()){
+            retrieveAllPosts();
+        }
+        else {
+            pendingAction = PendingAction.PAGE_POST;
+            // We need to get new permissions, then complete the action when we get called back.
+            if(!AccessToken.getCurrentAccessToken().getPermissions().contains("manage_pages"))
+                LoginManager.getInstance().logInWithPublishPermissions(this, Arrays.asList("manage_pages"));
+            if(!AccessToken.getCurrentAccessToken().getPermissions().contains("publish_pages"))
+                LoginManager.getInstance().logInWithPublishPermissions(this, Arrays.asList("publish_pages"));
+            if(!AccessToken.getCurrentAccessToken().getPermissions().contains("read_insights"))
+                LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("read_insights"));
+        }
+    }
+
+    private void onClickPagePost(){
+//        showInputDialog();
+        performPublish(PendingAction.PAGE_POST, true);
+    }
+
+    private void pagePost() {
+        Profile profile = Profile.getCurrentProfile();
+        Log.d("facebook##", "profile  " + profile);
+        if (profile != null && hasPagePermission()){
+            showInputDialog();
+        }
+        else {
+            pendingAction = PendingAction.PAGE_POST;
+            // We need to get new permissions, then complete the action when we get called back.
+            if(!AccessToken.getCurrentAccessToken().getPermissions().contains("manage_pages"))
+                LoginManager.getInstance().logInWithPublishPermissions(this, Arrays.asList("manage_pages"));
+            if(!AccessToken.getCurrentAccessToken().getPermissions().contains("publish_pages"))
+                LoginManager.getInstance().logInWithPublishPermissions(this, Arrays.asList("publish_pages"));
+        }
     }
 
     private void onClickPostStatusUpdate() {
@@ -621,7 +670,25 @@ public class MainActivity extends FragmentActivity {
 
     private boolean hasPublishPermission() {
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        Log.d("facebook##", "publish_actions " + accessToken.getPermissions().contains("publish_actions"));
         return accessToken != null && accessToken.getPermissions().contains("publish_actions");
+    }
+
+    private boolean hasPagePermission() {
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        Log.d("facebook##", "publish_pages "+accessToken.getPermissions().contains("publish_pages"));
+        Log.d("facebook##", "manage  "+accessToken.getPermissions().contains("manage_pages"));
+        Log.d("facebook##", "publish permission "+hasPublishPermission());
+        return accessToken != null && accessToken.getPermissions().contains("publish_pages")
+                && accessToken.getPermissions().contains("manage_pages");
+    }
+
+    private boolean hasAllPagePermission() {
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+
+        return accessToken != null && accessToken.getPermissions().contains("publish_pages")
+                && accessToken.getPermissions().contains("manage_pages")
+                && accessToken.getPermissions().contains("read_insights");
     }
 
     private void performPublish(PendingAction action, boolean allowNoToken) {

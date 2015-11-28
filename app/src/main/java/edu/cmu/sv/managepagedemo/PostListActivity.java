@@ -63,7 +63,7 @@ public class PostListActivity extends Activity{
                 Toast.makeText(getBaseContext(), position + " is selected", Toast.LENGTH_SHORT).show();
                 selectedPost = posts.get(position);
                 String currentId = selectedPost.getId();
-                new GetTask().execute("https://graph.facebook.com/901893839866098_907621532626662/insights/post_impressions_unique/lifetime?access_token=CAAVOngp3Ys0BACoqRehqry0EaCDFbWGdJbPxpKf77FdHDZBJl9nvrYYMOWFAKSj1ldhOSw8tpqVfpTTJ41y21HTg94NTL0J6TNYHbTtZBc7Y1Da3AsLYekuABBRrWwtdHclNZAFM9OjDLADbNzaJ16TELyx1xZCAgdOSQxGH5sPpA7f0dzYV");
+                new GetTask().execute("https://graph.facebook.com/"+currentId+"/insights/post_impressions_unique/lifetime?access_token=CAAOOwRcZBOD4BACwLkcMSXQIdESZCfxn9eMIaalLtDCidomUifxm8YP0ZAZCQUwz5FixBeHV5uWZCLRzUZBa3u4eTtWb0owEcHt9LuZASwk1ppc8HP6dU2YAhCus2dQklG4d8vM0VctRv3lSOzDCZBxT5IeNPIxaYltZAlTZAcqbplvlRTf0m7oRSltW0pJb0umtcZD");
             }
         });
 
