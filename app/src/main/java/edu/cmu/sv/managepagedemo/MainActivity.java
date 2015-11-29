@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
@@ -87,9 +88,9 @@ public class MainActivity extends FragmentActivity {
 
     private final String PENDING_ACTION_BUNDLE_KEY =
             "com.example.hellofacebook:PendingAction";
-
+    public static final String MY_PREFS_NAME = "MyPrefsFile";
     private ArrayList<PostDataProvider> posts = new ArrayList<>();
-    public static String pageAccessTotken;
+//    public static String pageAccessTotken;
     private Button postStatusUpdateButton;
     private Button postPhotoButton;
     private Button pagePostButton;
@@ -158,6 +159,7 @@ public class MainActivity extends FragmentActivity {
                     public void onSuccess(LoginResult loginResult) {
                         handlePendingAction();
                         updateUI();
+                        getPageAccessCode();
                     }
 
                     @Override
@@ -216,7 +218,7 @@ public class MainActivity extends FragmentActivity {
         Button publishPostButton = (Button) findViewById(R.id.publishPostButton);
         publishPostButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                publishPost();
+                getPageAccessCode();
             }
         });
 
@@ -263,6 +265,7 @@ public class MainActivity extends FragmentActivity {
         // Can we present the share dialog for photos?
         canPresentShareDialogWithPhotos = ShareDialog.canShow(
                 SharePhotoContent.class);
+
     }
 
     protected void showInputDialog() {
@@ -381,9 +384,9 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-    public void publishPost() {
-        LoginManager.getInstance().logInWithPublishPermissions(this, Arrays.asList("manage_pages"));
-        LoginManager.getInstance().logInWithPublishPermissions(this, Arrays.asList("publish_pages"));
+    public void getPageAccessCode() {
+//        LoginManager.getInstance().logInWithPublishPermissions(this, Arrays.asList("manage_pages"));
+//        LoginManager.getInstance().logInWithPublishPermissions(this, Arrays.asList("publish_pages"));
         new GraphRequest(
                 AccessToken.getCurrentAccessToken(),
                 "/me/accounts",
@@ -401,8 +404,14 @@ public class MainActivity extends FragmentActivity {
                                 array = jsonObject.getJSONArray("data");
                                 for (int i = 0; i < array.length(); i++) {
                                     JSONObject item = array.getJSONObject(i);
-                                    pageAccessTotken = item.getString("access_token");
+//                                    pageAccessTotken = item.getString("access_token");
                                     Log.d("facebook##", "response " + item.getString("access_token"));
+
+                                    // Save to SharedPreference
+                                    SharedPreferences.Editor editor = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE).edit();
+                                    editor.putString("access_token", item.getString("access_token"));
+                                    editor.commit();
+
                                 }
 //                                createRegularPost("Test");
                             }
@@ -442,11 +451,17 @@ public class MainActivity extends FragmentActivity {
                 conn.setDoInput(true);
                 conn.setDoOutput(true);
 
+                // Read access code from sharedpreference
+                SharedPreferences prefs = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE);
+                String pageAccessTotken = prefs.getString("access_token", null);
+                Log.d("facebook##", "access_token: "+pageAccessTotken);
+
                 // FOR POST
                 Uri.Builder builder = new Uri.Builder()
                         .appendQueryParameter("message", urls[0])
 //                        .appendQueryParameter("published", "false")
-                        .appendQueryParameter("access_token", "CAAOOwRcZBOD4BACwLkcMSXQIdESZCfxn9eMIaalLtDCidomUifxm8YP0ZAZCQUwz5FixBeHV5uWZCLRzUZBa3u4eTtWb0owEcHt9LuZASwk1ppc8HP6dU2YAhCus2dQklG4d8vM0VctRv3lSOzDCZBxT5IeNPIxaYltZAlTZAcqbplvlRTf0m7oRSltW0pJb0umtcZD");
+                          .appendQueryParameter("access_token", pageAccessTotken);
+//                        .appendQueryParameter("access_token", "CAAOOwRcZBOD4BACwLkcMSXQIdESZCfxn9eMIaalLtDCidomUifxm8YP0ZAZCQUwz5FixBeHV5uWZCLRzUZBa3u4eTtWb0owEcHt9LuZASwk1ppc8HP6dU2YAhCus2dQklG4d8vM0VctRv3lSOzDCZBxT5IeNPIxaYltZAlTZAcqbplvlRTf0m7oRSltW0pJb0umtcZD");
                 if(urls[1].equals("false")){
                     builder.appendQueryParameter("published", "false");
                     Log.d("facebook##", urls[1]+" published->false");
@@ -493,7 +508,12 @@ public class MainActivity extends FragmentActivity {
     }
 
     private void retrieveAllPosts() {
-        new GetTask().execute("https://graph.facebook.com/901893839866098/promotable_posts?fields=is_published,created_time,id,message&access_token=CAAOOwRcZBOD4BACwLkcMSXQIdESZCfxn9eMIaalLtDCidomUifxm8YP0ZAZCQUwz5FixBeHV5uWZCLRzUZBa3u4eTtWb0owEcHt9LuZASwk1ppc8HP6dU2YAhCus2dQklG4d8vM0VctRv3lSOzDCZBxT5IeNPIxaYltZAlTZAcqbplvlRTf0m7oRSltW0pJb0umtcZD");
+        // Read access code from sharedpreference
+        SharedPreferences prefs = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE);
+        String pageAccessTotken = prefs.getString("access_token", null);
+        Log.d("facebook##", "access_token: "+pageAccessTotken);
+
+        new GetTask().execute("https://graph.facebook.com/901893839866098/promotable_posts?fields=is_published,created_time,id,message&access_token="+pageAccessTotken);
     }
 
     class GetTask extends AsyncTask<String, Void, String> {

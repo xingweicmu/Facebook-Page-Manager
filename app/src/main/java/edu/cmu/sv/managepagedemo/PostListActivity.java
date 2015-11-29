@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -63,7 +64,13 @@ public class PostListActivity extends Activity{
                 Toast.makeText(getBaseContext(), position + " is selected", Toast.LENGTH_SHORT).show();
                 selectedPost = posts.get(position);
                 String currentId = selectedPost.getId();
-                new GetTask().execute("https://graph.facebook.com/"+currentId+"/insights/post_impressions_unique/lifetime?access_token=CAAOOwRcZBOD4BACwLkcMSXQIdESZCfxn9eMIaalLtDCidomUifxm8YP0ZAZCQUwz5FixBeHV5uWZCLRzUZBa3u4eTtWb0owEcHt9LuZASwk1ppc8HP6dU2YAhCus2dQklG4d8vM0VctRv3lSOzDCZBxT5IeNPIxaYltZAlTZAcqbplvlRTf0m7oRSltW0pJb0umtcZD");
+
+                // Read access code from sharedpreference
+                SharedPreferences prefs = getSharedPreferences(MainActivity.MY_PREFS_NAME, MODE_PRIVATE);
+                String pageAccessTotken = prefs.getString("access_token", null);
+                Log.d("facebook##", "access_token: "+pageAccessTotken);
+
+                new GetTask().execute("https://graph.facebook.com/"+currentId+"/insights/post_impressions_unique/lifetime?access_token="+pageAccessTotken);
             }
         });
 
