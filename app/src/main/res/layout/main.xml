@@ -30,7 +30,8 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:background="#FFF"
-        android:id="@+id/main_ui_container">
+        android:id="@+id/main_ui_container"
+        android:weightSum="1">
         <com.facebook.login.widget.LoginButton
             android:layout_width="200dp"
             android:layout_height="wrap_content"
@@ -38,7 +39,7 @@
             android:layout_gravity="center_horizontal"
             facebook:com_facebook_confirm_logout="false"
             facebook:com_facebook_tooltip_mode="never_display"
-            />
+            android:layout_weight="0.33" />
         <LinearLayout
             android:layout_width="200dp"
             android:layout_height="wrap_content"
@@ -76,23 +77,23 @@
             <Button
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="Access Code"
-                android:id="@+id/publishPostButton" />
+                android:text="Post Page"
+                android:id="@+id/postPageButton" />
             <Button
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:text="All Post"
                 android:id="@+id/allPostButton" />
+            <!--<Button-->
+                <!--android:layout_width="fill_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="Post Views"-->
+                <!--android:id="@+id/postViewButton" />-->
             <Button
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="Post Views"
-                android:id="@+id/postViewButton" />
-            <Button
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="Post Page"
-                android:id="@+id/postPageButton" />
+                android:text="Renew Access Code"
+                android:id="@+id/renewButton" />
 
         </LinearLayout>
 

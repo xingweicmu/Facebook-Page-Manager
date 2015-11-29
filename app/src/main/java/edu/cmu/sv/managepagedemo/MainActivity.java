@@ -38,27 +38,15 @@ import com.facebook.login.LoginResult;
 import com.facebook.login.widget.ProfilePictureView;
 import com.facebook.share.ShareApi;
 import com.facebook.share.Sharer;
-import com.facebook.share.internal.ShareFeedContent;
 import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.model.SharePhoto;
 import com.facebook.share.model.SharePhotoContent;
 import com.facebook.share.widget.ShareDialog;
-
-//import org.apache.http.HttpResponse;
-//import org.apache.http.NameValuePair;
-//import org.apache.http.client.ClientProtocolException;
-//import org.apache.http.client.HttpClient;
-//import org.apache.http.client.entity.UrlEncodedFormEntity;
-//import org.apache.http.client.methods.HttpPost;
-//import org.apache.http.impl.client.DefaultHttpClient;
-//import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -71,7 +59,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.List;
 import java.util.TimeZone;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -90,11 +77,11 @@ public class MainActivity extends FragmentActivity {
             "com.example.hellofacebook:PendingAction";
     public static final String MY_PREFS_NAME = "MyPrefsFile";
     private ArrayList<PostDataProvider> posts = new ArrayList<>();
-//    public static String pageAccessTotken;
     private Button postStatusUpdateButton;
     private Button postPhotoButton;
     private Button pagePostButton;
     private Button allPagePostButton;
+    private Button renewButton;
     private ProfilePictureView profilePictureView;
     private TextView greeting;
     private PendingAction pendingAction = PendingAction.NONE;
@@ -151,7 +138,6 @@ public class MainActivity extends FragmentActivity {
         FacebookSdk.sdkInitialize(this.getApplicationContext());
 
         callbackManager = CallbackManager.Factory.create();
-//        LoginManager.getInstance().per
 
         LoginManager.getInstance().registerCallback(callbackManager,
                 new FacebookCallback<LoginResult>() {
@@ -215,25 +201,24 @@ public class MainActivity extends FragmentActivity {
         profilePictureView = (ProfilePictureView) findViewById(R.id.profilePicture);
         greeting = (TextView) findViewById(R.id.greeting);
 
-        Button publishPostButton = (Button) findViewById(R.id.publishPostButton);
-        publishPostButton.setOnClickListener(new View.OnClickListener() {
+        renewButton = (Button) findViewById(R.id.renewButton);
+        renewButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 getPageAccessCode();
             }
         });
 
+//        Button postViewButton = (Button) findViewById(R.id.postViewButton);
+//        postViewButton.setOnClickListener(new View.OnClickListener() {
+//            public void onClick(View view) {
+//                onePostView();
+//            }
+//        });
+
         allPagePostButton = (Button) findViewById(R.id.allPostButton);
         allPagePostButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-//                retrieveAllPosts();
                 onClickAllPagePost();
-            }
-        });
-
-        Button postViewButton = (Button) findViewById(R.id.postViewButton);
-        postViewButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                onePostView();
             }
         });
 
@@ -286,7 +271,7 @@ public class MainActivity extends FragmentActivity {
                             createPost(editText.getText().toString(), true);
                         }
                         else{
-                            Toast.makeText(getApplicationContext(), "Publish switch is set OFF.", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "Publish switch is set OFF.", Toast.LENGTH_SHORT).show();
                             createPost(editText.getText().toString(), false);
                         }
                     }
@@ -385,8 +370,6 @@ public class MainActivity extends FragmentActivity {
     }
 
     public void getPageAccessCode() {
-//        LoginManager.getInstance().logInWithPublishPermissions(this, Arrays.asList("manage_pages"));
-//        LoginManager.getInstance().logInWithPublishPermissions(this, Arrays.asList("publish_pages"));
         new GraphRequest(
                 AccessToken.getCurrentAccessToken(),
                 "/me/accounts",
@@ -404,7 +387,6 @@ public class MainActivity extends FragmentActivity {
                                 array = jsonObject.getJSONArray("data");
                                 for (int i = 0; i < array.length(); i++) {
                                     JSONObject item = array.getJSONObject(i);
-//                                    pageAccessTotken = item.getString("access_token");
                                     Log.d("facebook##", "response " + item.getString("access_token"));
 
                                     // Save to SharedPreference
@@ -413,7 +395,6 @@ public class MainActivity extends FragmentActivity {
                                     editor.commit();
 
                                 }
-//                                createRegularPost("Test");
                             }
                             else{
                                 Toast.makeText(getApplicationContext(), "OAuthException! Please try to login again.", Toast.LENGTH_LONG).show();
@@ -447,7 +428,6 @@ public class MainActivity extends FragmentActivity {
                 conn.setReadTimeout(10000);
                 conn.setConnectTimeout(15000);
                 conn.setRequestMethod("POST");
-//                conn.setRequestMethod("GET");
                 conn.setDoInput(true);
                 conn.setDoOutput(true);
 
@@ -511,7 +491,7 @@ public class MainActivity extends FragmentActivity {
         // Read access code from sharedpreference
         SharedPreferences prefs = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE);
         String pageAccessTotken = prefs.getString("access_token", null);
-        Log.d("facebook##", "access_token: "+pageAccessTotken);
+        Log.d("facebook##", "access_token: " + pageAccessTotken);
 
         new GetTask().execute("https://graph.facebook.com/901893839866098/promotable_posts?fields=is_published,created_time,id,message&access_token="+pageAccessTotken);
     }
@@ -606,16 +586,20 @@ public class MainActivity extends FragmentActivity {
     private void allPagePost() {
         Profile profile = Profile.getCurrentProfile();
         Log.d("facebook##", "profile  " + profile);
-        if (profile != null && hasAllPagePermission()){
+        if(profile == null) {
+            Toast.makeText(getApplicationContext(), "Please Login!", Toast.LENGTH_LONG).show();
+            return;
+        }
+        if (hasAllPagePermission()){
             retrieveAllPosts();
         }
         else {
-            pendingAction = PendingAction.PAGE_POST;
+            pendingAction = PendingAction.ALL_PAGE_POST;
             // We need to get new permissions, then complete the action when we get called back.
-            if(!AccessToken.getCurrentAccessToken().getPermissions().contains("manage_pages"))
-                LoginManager.getInstance().logInWithPublishPermissions(this, Arrays.asList("manage_pages"));
             if(!AccessToken.getCurrentAccessToken().getPermissions().contains("publish_pages"))
                 LoginManager.getInstance().logInWithPublishPermissions(this, Arrays.asList("publish_pages"));
+            if(!AccessToken.getCurrentAccessToken().getPermissions().contains("manage_pages"))
+                LoginManager.getInstance().logInWithPublishPermissions(this, Arrays.asList("manage_pages"));
             if(!AccessToken.getCurrentAccessToken().getPermissions().contains("read_insights"))
                 LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("read_insights"));
         }
@@ -629,16 +613,21 @@ public class MainActivity extends FragmentActivity {
     private void pagePost() {
         Profile profile = Profile.getCurrentProfile();
         Log.d("facebook##", "profile  " + profile);
-        if (profile != null && hasPagePermission()){
+        if(profile == null) {
+            Toast.makeText(getApplicationContext(), "Please Login!", Toast.LENGTH_LONG).show();
+            return;
+        }
+        if (hasPagePermission()){
             showInputDialog();
         }
         else {
             pendingAction = PendingAction.PAGE_POST;
             // We need to get new permissions, then complete the action when we get called back.
-            if(!AccessToken.getCurrentAccessToken().getPermissions().contains("manage_pages"))
-                LoginManager.getInstance().logInWithPublishPermissions(this, Arrays.asList("manage_pages"));
             if(!AccessToken.getCurrentAccessToken().getPermissions().contains("publish_pages"))
                 LoginManager.getInstance().logInWithPublishPermissions(this, Arrays.asList("publish_pages"));
+            if(!AccessToken.getCurrentAccessToken().getPermissions().contains("manage_pages"))
+                LoginManager.getInstance().logInWithPublishPermissions(this, Arrays.asList("manage_pages"));
+
         }
     }
 
@@ -699,14 +688,16 @@ public class MainActivity extends FragmentActivity {
         Log.d("facebook##", "publish_pages "+accessToken.getPermissions().contains("publish_pages"));
         Log.d("facebook##", "manage  "+accessToken.getPermissions().contains("manage_pages"));
         Log.d("facebook##", "publish permission "+hasPublishPermission());
-        return accessToken != null && accessToken.getPermissions().contains("publish_pages")
+        return accessToken != null
+                // && accessToken.getPermissions().contains("publish_pages")
                 && accessToken.getPermissions().contains("manage_pages");
     }
 
     private boolean hasAllPagePermission() {
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
 
-        return accessToken != null && accessToken.getPermissions().contains("publish_pages")
+        return accessToken != null
+                // && accessToken.getPermissions().contains("publish_pages")
                 && accessToken.getPermissions().contains("manage_pages")
                 && accessToken.getPermissions().contains("read_insights");
     }
